@@ -10,7 +10,7 @@ import authRoutes from './routes/auth.js';
 import leadsRoutes from './routes/leads.js';
 import { generalLimiter } from './middleware/rateLimiter.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
-// Validate required ENV early
+
 const required = ['MONGO_URI', 'JWT_SECRET'];
 for (const name of required) {
   if (!process.env[name]) {
@@ -22,30 +22,29 @@ for (const name of required) {
 const app = express();
 connectDB();
 
-// Basic middleware
 app.use(helmet());
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '50kb' }));
 app.use(mongoSanitize());
 app.use(xss());
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || '*',
+    credentials: true,
+    exposedHeaders: ['Content-Disposition']
+  })
+);
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-
-// Rate limiting (general)
 app.use(generalLimiter);
 
-// Routes
+// routes
 app.use('/api/auth', authRoutes);
 app.use('/api/leads', leadsRoutes);
 
-// Health
+// health
 app.get('/health', (req, res) => res.json({ ok: true, env: process.env.NODE_ENV || 'development' }));
 
-// 404 + error handler
 app.use(notFound);
 app.use(errorHandler);
 
-// Start
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));

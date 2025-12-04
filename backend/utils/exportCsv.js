@@ -1,6 +1,12 @@
-import { AsyncParser, NodeAsyncParser } from '@json2csv/node';
+import { AsyncParser } from "@json2csv/node";
 
-export const exportToCsv = async (data, fields) => {
-  const parser = new AsyncParser({ fields });
-  return parser.parseAsync(data);
+export const exportToCsv = async (data = [], fields = []) => {
+  try {
+    const parser = new AsyncParser({ fields });
+    // .parse returns stream wrapper; .promise() returns final CSV string
+    return parser.parse(data).promise();
+  } catch (err) {
+    console.error("CSV export failed:", err);
+    throw new Error("Failed to export CSV");
+  }
 };

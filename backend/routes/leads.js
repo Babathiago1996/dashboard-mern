@@ -3,12 +3,7 @@ import { createLead, listLeads, exportLeadsCsv } from '../controllers/leadContro
 import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
-
-// Public lead submission
-router.post('/', createLead);
-
-// Protected list + export
-router.get('/', auth, listLeads);
-router.get('/export/csv', auth, exportLeadsCsv);
-
-export default router;
+router.post('/', createLead);               // public submit
+router.get('/', auth, listLeads);           // protected list
+router.get('/export/csv', auth, exportLeadsCsv); // protected export
+export default router;

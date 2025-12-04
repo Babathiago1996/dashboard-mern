@@ -9,17 +9,19 @@ const userSchema = new mongoose.Schema({
     validate: { validator: validator.isEmail, message: 'Invalid email' }
   },
   passwordHash: { type: String, required: true, select: false },
-  role: { type: String, enum: ['admin', 'user'], default: 'admin' }, // admin by default for MMP seed; change as needed
+  role: { type: String, enum: ['admin', 'user'], default: 'admin' }
 }, { timestamps: true });
 
-userSchema.methods.verifyPassword = async function (plain) {
-  return bcrypt.compare(plain, this.passwordHash);
+userSchema.methods.verifyPassword = function (password) {
+  return bcrypt.compare(password, this.passwordHash);
 };
 
 userSchema.pre('save', async function (next) {
-  if (!this.isModified || !this.isModified('passwordHash')) return next();
-  // If you store raw password as passwordHash accidentally, ensure it's hashed elsewhere; here we assume seed sets hashed.
+  if (!this.isModified('passwordHash')) return next();
+  if (typeof this.passwordHash === 'string' && this.passwordHash.startsWith('$2')) return next();
+  const salt = await bcrypt.genSalt(10);
+  this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
   next();
 });
 
-export default mongoose.model('User', userSchema);
+export default mongoose.model('User', userSchema);

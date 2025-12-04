@@ -3,13 +3,11 @@ import mongoose from 'mongoose';
 const connectDB = async () => {
   const uri = process.env.MONGO_URI;
   if (!uri) {
-    console.error('MONGO_URI not set. Aborting.');
+    console.error('MONGO_URI not set');
     process.exit(1);
   }
   mongoose.connection.on('connected', () => console.log('MongoDB connected'));
-  mongoose.connection.on('error', (err) => console.error('MongoDB connection error', err));
-  mongoose.connection.on('disconnected', () => console.warn('MongoDB disconnected'));
-
+  mongoose.connection.on('error', (err) => console.error('MongoDB error', err));
   try {
     await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
   } catch (err) {
@@ -18,4 +16,4 @@ const connectDB = async () => {
   }
 };
 
-export default connectDB;
+export default connectDB;

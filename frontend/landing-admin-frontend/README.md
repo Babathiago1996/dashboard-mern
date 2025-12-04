@@ -1,16 +1,36 @@
-# React + Vite
+# LeadManager — MERN Admin Dashboard (Revamped)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A production-ready MERN project: admin dashboard + landing site, responsive UI, email notifications, background queue, CSV export, JWT auth.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Highlights
 
-## React Compiler
+- Node 18+, Express, MongoDB (Mongoose)
+- React 18 + Vite, Tailwind
+- JWT authentication
+- CSV export using @json2csv/node
+- Email sending via Resend (preferred) with SMTP fallback
+- Bull + Redis for delayed autoresponder (5 minutes)
+- Responsive dashboard layout + mobile menu
+- React Hook Form validation for login
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Local development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+- Node.js 18+
+- MongoDB (Atlas or local)
+- Redis (for background queue; optional if you don't use autoresponder)
+
+### Backend
+```bash
+cd backend
+cp .env.example .env
+# Edit .env with MONGO_URI, JWT_SECRET, RESEND_API_KEY or SMTP credentials, REDIS_URL
+npm install
+npm run seed        # create admin from env variables
+npm run dev
+# In another terminal:
+node worker.js      # start worker to process email queue

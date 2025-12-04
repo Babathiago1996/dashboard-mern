@@ -1,115 +1,76 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Lock, Mail } from 'lucide-react';
-import Button from '../components/Button';
-import Input from '../components/Input';
-import Card from '../components/Card';
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useAuth } from "../context/AuthContext";
+import Input from "../components/Input";
+import Button from "../components/Button";
+import { Eye, EyeOff } from "lucide-react";
 
-const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-  
+export default function Login() {
   const { login } = useAuth();
-  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm();
+  const [show, setShow] = useState(false);
 
-  const validate = () => {
-    const newErrors = {};
-    
-    if (!email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid';
-    }
-    
-    if (!password) {
-      newErrors.password = 'Password is required';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validate()) return;
-    
-    setLoading(true);
-    const success = await login(email, password);
-    setLoading(false);
-    
-    if (success) {
-      navigate('/dashboard');
-    }
+  const onSubmit = async (data) => {
+    await login(data.email, data.password);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-100 px-4">
-      <div className="w-full max-w-md animate-fade-in">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-600 rounded-full mb-4 shadow-lg">
-            <Lock className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome Back
-          </h1>
-          <p className="text-gray-600">
-            Sign in to access your dashboard
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="max-w-md w-full p-6">
+        <div className="bg-white p-8 rounded-xl shadow">
+          <h2 className="text-2xl font-semibold mb-2">Sign in</h2>
+          <p className="text-sm text-gray-500 mb-6">
+            Access your LeadManager dashboard
           </p>
-        </div>
 
-        <Card className="animate-slide-up">
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <Input
+              label="Email"
+              type="email"
+              {...register("email", { required: "Email required" })}
+              error={errors.email?.message}
+            />
             <div>
-              <Input
-                label="Email Address"
-                type="email"
-                placeholder="admin@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                error={errors.email}
-                disabled={loading}
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={show ? "text" : "password"}
+                  className={`w-full px-4 py-2 border rounded-md ${
+                    errors.password ? "border-red-500" : "border-gray-300"
+                  }`}
+                  {...register("password", {
+                    required: "Password required",
+                    minLength: { value: 8, message: "Minimum 8 chars" },
+                  })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShow((s) => !s)}
+                  className="absolute right-3 top-2 text-gray-500"
+                >
+                  {show ? <EyeOff /> : <Eye />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
-            <div>
-              <Input
-                label="Password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                error={errors.password}
-                disabled={loading}
-              />
-            </div>
-
-            <Button
-              type="submit"
-              variant="primary"
-              className="w-full"
-              loading={loading}
-            >
-              Sign In
+            <Button type="submit" loading={isSubmitting} className="w-full">
+              Sign in
             </Button>
           </form>
-
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-sm text-center text-gray-600">
-              Need help? Contact your administrator
-            </p>
-          </div>
-        </Card>
-
-        <p className="mt-6 text-center text-sm text-gray-500">
-          Protected by enterprise-grade security
-        </p>
+        </div>
       </div>
+         
     </div>
   );
-};
-
-export default Login;
+}
