@@ -6,14 +6,16 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-api.interceptors.request.use(
-  (cfg) => {
-    const token = localStorage.getItem("token");
-    if (token) cfg.headers.Authorization = `Bearer ${token}`;
-    return cfg;
-  },
-  (e) => Promise.reject(e)
-);
+api.interceptors.request.use((cfg) => {
+  const token = localStorage.getItem("token");
+
+  // Do NOT attach token on login
+  if (!cfg.url.includes("/auth/login") && token) {
+    cfg.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return cfg;
+});
 
 export const authAPI = {
   login: (data) => api.post("/auth/login", data),
