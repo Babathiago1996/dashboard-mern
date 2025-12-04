@@ -22,8 +22,8 @@ for (const name of required) {
 }
 
 const app = express();
+app.set("trust proxy", 1); // <-- REQUIRED FOR RENDER
 connectDB();
-
 app.use(helmet());
 app.use(express.json({ limit: "50kb" }));
 app.use(mongoSanitize());
