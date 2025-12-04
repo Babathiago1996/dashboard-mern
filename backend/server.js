@@ -1,20 +1,22 @@
-import 'dotenv/config';
-import express from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
-import mongoSanitize from 'express-mongo-sanitize';
-import xss from 'xss-clean';
-import morgan from 'morgan';
-import connectDB from './config/db.js';
-import authRoutes from './routes/auth.js';
-import leadsRoutes from './routes/leads.js';
-import { generalLimiter } from './middleware/rateLimiter.js';
-import { errorHandler, notFound } from './middleware/errorHandler.js';
+import "dotenv/config";
+import express from "express";
+import helmet from "helmet";
+import cors from "cors";
+import mongoSanitize from "express-mongo-sanitize";
+import xss from "xss-clean";
+import morgan from "morgan";
+import connectDB from "./config/db.js";
+import authRoutes from "./routes/auth.js";
+import leadsRoutes from "./routes/leads.js";
+import { generalLimiter } from "./middleware/rateLimiter.js";
+import { errorHandler, notFound } from "./middleware/errorHandler.js";
 
-const required = ['MONGO_URI', 'JWT_SECRET'];
+const required = ["MONGO_URI", "JWT_SECRET"];
 for (const name of required) {
   if (!process.env[name]) {
-    console.error(`Missing required environment variable: ${name}. See .env.example`);
+    console.error(
+      `Missing required environment variable: ${name}. See .env.example`
+    );
     process.exit(1);
   }
 }
@@ -23,25 +25,27 @@ const app = express();
 connectDB();
 
 app.use(helmet());
-app.use(express.json({ limit: '50kb' }));
+app.use(express.json({ limit: "50kb" }));
 app.use(mongoSanitize());
 app.use(xss());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || '*',
+    origin: process.env.CORS_ORIGIN || "*",
     credentials: true,
-    exposedHeaders: ['Content-Disposition']
+    exposedHeaders: ["Content-Disposition"],
   })
 );
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(generalLimiter);
 
 // routes
-app.use('/api/auth', authRoutes);
-app.use('/api/leads', leadsRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/leads", leadsRoutes);
 
 // health
-app.get('/health', (req, res) => res.json({ ok: true, env: process.env.NODE_ENV || 'development' }));
+app.get("/health", (req, res) =>
+  res.json({ ok: true, env: process.env.NODE_ENV || "development" })
+);
 
 app.use(notFound);
 app.use(errorHandler);
